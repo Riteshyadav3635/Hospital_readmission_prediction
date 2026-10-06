@@ -1,24 +1,22 @@
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
+# Python
 .venv/
 venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Local settings and temporary prediction history
 .env
 .env.*
 !.env.example
-!**/.env.example
+.streamlit/secrets.toml
+prediction_history.csv
+
+# Tool and operating system caches
 .pytest_cache/
 .mypy_cache/
-node_modules/
-dist/
-coverage/
-*.log
+.ruff_cache/
 .DS_Store
+*.log
+*.tmp
 **/.ipynb_checkpoints/
-*.tsbuildinfo
-frontend/vite.config.js
-frontend/vite.config.d.ts
-*.sqlite
-*.sqlite3
-*.db
