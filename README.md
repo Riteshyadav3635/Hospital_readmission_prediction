@@ -64,7 +64,7 @@ Matplotlib and Plotly are not required by the application.
 
 ## Installation
 
-Python 3.13 is recommended for compatibility with the serialized scikit-learn artifacts and the pinned dependencies.
+Use Python 3.13 to match the local environment used with the serialized scikit-learn artifacts and pinned dependencies.
 
 Create and activate a virtual environment:
 
@@ -94,9 +94,9 @@ Open the local URL printed by Streamlit (normally `http://localhost:8501`). No e
 
 1. Push this repository to GitHub, ensuring `app.py`, `requirements.txt`, and all files in `ml/models/` are committed.
 2. Sign in to [Streamlit Community Cloud](https://share.streamlit.io/) and choose **Create app**.
-3. Select the GitHub repository and branch.
-4. Set the app file path to `app.py` at the repository root.
-5. Deploy. Community Cloud installs the dependencies from the root `requirements.txt`.
+3. Select the GitHub repository and branch, and set the app file path to `app.py` at the repository root.
+4. Open **Advanced settings** and choose **Python 3.13** to match the project's local runtime and the pinned package versions.
+5. Deploy. Community Cloud installs the dependencies from the root `requirements.txt` and reads `.streamlit/config.toml` automatically.
 
 No secrets configuration is needed. Keep the saved model artifacts in the repository so the app can load them at startup. Streamlit Community Cloud's local runtime is ephemeral; session prediction history is temporary and can disappear after a restart or when a user session ends.
 
