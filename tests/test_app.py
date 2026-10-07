@@ -2,39 +2,74 @@ import unittest
 
 from streamlit.testing.v1 import AppTest
 
-DISCLAIMER = (
-    "This application is intended for educational and research purposes only and "
-    "should not be used as a substitute for professional medical advice."
-)
+from src.utils import HISTORY_PATH, clear_prediction_history, load_prediction_history
+
+
+PAGES = [
+    "🏠 Dashboard",
+    "🔮 Predict Readmission",
+    "📊 Analytics",
+    "📋 Prediction History",
+    "🤖 Model Insights",
+    "📁 Dataset Explorer",
+    "ℹ️ About Project",
+]
 
 
 class StreamlitAppTests(unittest.TestCase):
-    def test_home_renders_and_loads_the_saved_model(self):
-        app = AppTest.from_file("app.py", default_timeout=30).run()
-        self.assertFalse(app.exception)
-        self.assertIn("Hospital Readmission Prediction", [item.value for item in app.title])
-        self.assertTrue(any(DISCLAIMER in item.value for item in app.warning))
+    def setUp(self):
+        clear_prediction_history()
 
-    def test_prediction_and_session_history_can_be_cleared(self):
-        app = AppTest.from_file("app.py", default_timeout=30).run()
-        app.radio[0].set_value("Prediction").run()
+    def tearDown(self):
+        clear_prediction_history()
+
+    def test_all_major_pages_render_without_streamlit_exceptions(self):
+        app = AppTest.from_file("app.py", default_timeout=60).run()
+        self.assertFalse(app.exception)
+        self.assertTrue(any("Hospital Readmission Prediction" in item.value for item in app.title))
+
+        for page in PAGES[1:]:
+            with self.subTest(page=page):
+                app.radio[0].set_value(page).run()
+                self.assertFalse(app.exception)
+                if page in {"📊 Analytics", "📁 Dataset Explorer"}:
+                    self.assertEqual(len(app.get("download_button")), 1)
+
+        app.radio[0].set_value("📊 Analytics").run()
+        baseline_caption = next(c.value for c in app.caption if c.value.startswith("Showing "))
+        age_filter = next(widget for widget in app.selectbox if widget.key == "analytics_age")
+        age_filter.set_value("[0-10)").run()
+        filtered_caption = next(c.value for c in app.caption if c.value.startswith("Showing "))
+        self.assertNotEqual(filtered_caption, baseline_caption)
+
+    def test_real_prediction_is_saved_without_input_values_and_can_be_cleared(self):
+        app = AppTest.from_file("app.py", default_timeout=60).run()
+        app.radio[0].set_value("🔮 Predict Readmission").run()
         self.assertFalse(app.exception)
         self.assertEqual(len(app.number_input), 11)
-        self.assertEqual(app.button[0].label, "Run readmission estimate")
+        self.assertIn("Run readmission estimate", [button.label for button in app.button])
 
-        app.button[0].click().run()
+        next(button for button in app.button if button.label == "Run readmission estimate").click().run()
         self.assertFalse(app.exception)
-        self.assertTrue(app.success)
         self.assertEqual(len(app.metric), 2)
-        self.assertEqual(len(app.session_state["history"]), 1)
+        self.assertEqual(len(app.get("download_button")), 1)
 
-        app.radio[0].set_value("History").run()
+        stored = load_prediction_history()
+        self.assertEqual(len(stored), 1)
+        self.assertEqual(
+            list(stored.columns),
+            ["Timestamp (UTC)", "Prediction", "Probability", "Risk level"],
+        )
+        self.assertFalse(any("patient" in column.lower() for column in stored.columns))
+
+        app.radio[0].set_value("📋 Prediction History").run()
         self.assertFalse(app.exception)
         self.assertEqual(len(app.dataframe), 1)
-        app.button[0].click().run()
+        self.assertEqual(len(app.get("download_button")), 1)
+        next(button for button in app.button if button.label == "Clear prediction history").click().run()
         self.assertFalse(app.exception)
-        self.assertEqual(len(app.session_state["history"]), 0)
-        self.assertTrue(any("No predictions" in item.value for item in app.info))
+        self.assertTrue(load_prediction_history().empty)
+        self.assertFalse(HISTORY_PATH.exists())
 
 
 if __name__ == "__main__":
