@@ -11,8 +11,8 @@ PAGES = [
     "📊 Analytics",
     "📋 Prediction History",
     "🤖 Model Insights",
-    "📁 Dataset Explorer",
-    "ℹ️ About Project",
+    "🔎 Dataset Explorer",
+    "ℹ️ About",
 ]
 
 
@@ -27,12 +27,16 @@ class StreamlitAppTests(unittest.TestCase):
         app = AppTest.from_file("app.py", default_timeout=60).run()
         self.assertFalse(app.exception)
         self.assertTrue(any("Hospital Readmission Prediction" in item.value for item in app.title))
+        self.assertIn("Start Prediction →", [button.label for button in app.button])
+        next(button for button in app.button if button.label == "Start Prediction →").click().run()
+        self.assertFalse(app.exception)
+        self.assertEqual(app.radio[0].value, "🔮 Predict Readmission")
 
         for page in PAGES[1:]:
             with self.subTest(page=page):
                 app.radio[0].set_value(page).run()
                 self.assertFalse(app.exception)
-                if page in {"📊 Analytics", "📁 Dataset Explorer"}:
+                if page in {"📊 Analytics", "🔎 Dataset Explorer"}:
                     self.assertEqual(len(app.get("download_button")), 1)
 
         app.radio[0].set_value("📊 Analytics").run()
@@ -47,11 +51,11 @@ class StreamlitAppTests(unittest.TestCase):
         app.radio[0].set_value("🔮 Predict Readmission").run()
         self.assertFalse(app.exception)
         self.assertEqual(len(app.number_input), 11)
-        self.assertIn("Run readmission estimate", [button.label for button in app.button])
+        self.assertIn("Generate Prediction", [button.label for button in app.button])
 
-        next(button for button in app.button if button.label == "Run readmission estimate").click().run()
+        next(button for button in app.button if button.label == "Generate Prediction").click().run()
         self.assertFalse(app.exception)
-        self.assertEqual(len(app.metric), 2)
+        self.assertTrue(any(metric.label == "Prediction" for metric in app.metric))
         self.assertEqual(len(app.get("download_button")), 1)
 
         stored = load_prediction_history()

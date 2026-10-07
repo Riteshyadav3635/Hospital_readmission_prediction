@@ -14,6 +14,7 @@ The project formulates a binary classification task: predict whether an encounte
 - Prediction form generated from the saved scaler's exact 41 input features and fitted encoder categories.
 - Inference through the saved categorical encoders/mappings, StandardScaler, 35-component PCA, and Logistic Regression classifier.
 - Interactive dataset filters and charts for target outcome, age, gender, admission type, discharge disposition, specialty, and encounter utilization.
+- Interactive Plotly dashboard charts and live dataset-derived KPI cards and key insights.
 - Prediction history stored in a local CSV with prediction outputs only; submitted feature values and identifiers are not stored.
 - Dataset Explorer with shape, data types, missingness, unique-value counts, numeric summaries, search, paging, and filtered CSV download.
 - Model Insights page with saved estimator/PCA details, PCA variance charts, and evaluation results recorded in the original notebook.
@@ -54,6 +55,7 @@ The analysis notebook records these baseline held-out results: accuracy 66.86%, 
 
 - Python 3.13
 - Streamlit
+- Plotly
 - pandas
 - NumPy
 - scikit-learn
